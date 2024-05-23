@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app">
+      <img
+        src="./upload//1682233144748city.jpg"
+        alt=""
+        style="width: 300px; height: 300px"
+      />
+      <el-form ref="form" :model="form" label-width="80px">
+        <el-form-item label="帐号">
+          <el-input v-model="form.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="form.password"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="login">登录</el-button>
+          <el-button type="primary" @click="add">新增</el-button>
+          <el-button type="primary" @click="edit">修改</el-button>
+          <el-button>取消</el-button>
+        </el-form-item>
+      </el-form>
+      <div v-for="(item,index) in userList">
+        {{item.username}}{{item.email}}{{item.password}}
+      </div>
+      <el-upload
+        class="upload-demo"
+        :auto-upload="false"
+        multiple
+        action="#"
+        :on-change="handleFileChange"
+        :file-list="fileList"
+        :http-request="upload"
+      >
+        <el-button size="small" type="primary">点击上传</el-button>
+      </el-upload>
+      <el-button
+        size="small"
+        type="primary"
+        @click="submitUpload"
+        style="margin-top: 20px"
+        >上传</el-button
+      >
+    </div>
+    <script src="./vue.js"></script>
+    <script src="./element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="./element-ui/lib/theme-chalk/index.css" />
+    <script src="./axios.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          headers: {
+            authorization: `Bearer ${window.localStorage.getItem("token")}`,
+          },
+          message: "hello vue",
+          form: {
+            username: "admin",
+            password: "123321",
+          },
+          fileList: [],
+          userList: [],
+        },
+        mounted() {
+          this.getInfo();
+        },
+        methods: {
+          handleFileChange(file, fileList) {
+            console.log(file, fileList);
+            this.fileList = fileList;
+          },
+          submitUpload() {
+            let formData = new FormData();
+            // 将上传的文件放到数据对象中
+            this.fileList.forEach((file) => {
+              formData.append("file", file.raw);
+            });
+            axios
+              .post("http://127.0.0.1:5000/upload", formData, {
+                headers: {
+                  authorization: `Bearer ${window.localStorage.getItem(
+                    "token"
+                  )}`,
+                },
+              })
+              .then(function (response) {
+                // 处理成功情况
+                console.log(response);
+              })
+              .catch(function (error) {
+                // 处理错误情况
+                console.log(error);
+              })
+              .then(function () {
+                // 总是会执行
+              });
+          },
+          upload(f) {
+            console.log(f);
+            let formData = new FormData();
+            formData.append("file", f.file);
+            axios
+              .post("http://127.0.0.1:5000/upload", formData, {
+                headers: {
+                  authorization: `Bearer ${window.localStorage.getItem(
+                    "token"
+                  )}`,
+                },
+              })
+              .then(function (response) {
+                // 处理成功情况
+                console.log(response);
+              })
+              .catch(function (error) {
+                // 处理错误情况
+                console.log(error);
+              })
+              .then(function () {
+                // 总是会执行
+              });
+          },
+          getInfo() {
+            const _this = this;
+            axios
+              .get("http://127.0.0.1:5000/user/info", {
+                headers: {
+                  authorization: `Bearer ${window.localStorage.getItem(
+                    "token"
+                  )}`,
+                },
+              })
+              .then(function (response) {
+                // 处理成功情况
+                console.log(response);
+                _this.userList = response.data.data;
+              })
+              .catch(function (error) {
+                // 处理错误情况
+                console.log(error);
+              })
+              .then(function () {
+                // 总是会执行
+              });
+          },
+          edit() {
+            axios
+              .post(
+                "http://127.0.0.1:5000/update",
+                {
+                  id: 1,
+                  username: this.form.username,
+                  pwd: this.form.password,
+                  address: "深圳市龙岗区平湖街道",
+                },
+                {
+                  headers: {
+                    authorization: `Bearer ${window.localStorage.getItem(
+                      "token"
+                    )}`,
+                  },
+                }
+              )
+              .then(function (response) {
+                // 处理成功情况
+                console.log(response);
+              })
+              .catch(function (error) {
+                // 处理错误情况
+                console.log(error);
+              })
+              .then(function () {
+                // 总是会执行
+              });
+          },
+          add() {
+            axios
+              .post(
+                "http://127.0.0.1:5000/add",
+                {
+                  username: this.form.username,
+                  pwd: this.form.password,
+                  address: "深圳市龙岗区平湖街道",
+                },
+                {
+                  headers: {
+                    authorization: `Bearer ${window.localStorage.getItem(
+                      "token"
+                    )}`,
+                  },
+                }
+              )
+              .then(function (response) {
+                console.log(response);
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+          },
+          login() {
+            axios
+              .post("http://127.0.0.1:5000/login", {
+                username: this.form.username,
+                password: this.form.password,
+              })
+              .then(function (response) {
+                console.log(response);
+                window.localStorage.setItem("token", response.data.token);
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
